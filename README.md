@@ -1,6 +1,6 @@
 # user_registration
 
-A new Flutter project.
+A application for user registration made in Flutter.
 
 ## Getting Started
 
