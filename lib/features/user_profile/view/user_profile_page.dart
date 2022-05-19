@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:user_registration/features/user_profile/viewmodel/user_profile_view_model.dart';
 import 'package:user_registration/shared/models/profiles_enum.dart';
+import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 
 class UserProfilePage extends StatefulWidget {
@@ -24,6 +25,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   bool _isUser = false;
   bool _isManager = false;
   bool _isAdministrator = false;
+  bool _isLoading = false;
   
   @override
   Widget build(BuildContext context) {
@@ -135,25 +137,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: MaterialButton(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)
-                ),
-                color: Theme.of(context).colorScheme.primary,
-                height: 60,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  "SAVE",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary, 
-                  ),
-                )
-              ),
+            AsyncButton(
+              text: "SAVE",
+              isLoading: _isLoading,
+              onPressed: _startLoading
             ),
           ],
         ),
@@ -164,6 +151,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
   _onShowPassword() {
     setState(() {
       _hidePassword = !_hidePassword;
+    });
+  }
+
+  void _startLoading() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Future.delayed(Duration(seconds: 3)).then((value) {
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.pop(context);
     });
   }
 }

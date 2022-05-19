@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:user_registration/features/user_list/view/user_list_page.dart';
+import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,6 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _hidePassword = true;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -58,23 +60,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: MaterialButton(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)
-                    ),
-                    color: Theme.of(context).colorScheme.primary,
-                    height: 60,
-                    onPressed: () => _goToUsersPage(),
-                    child: Text(
-                      "ENTER",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary, 
-                      ),
-                    )
-                  ),
+                AsyncButton(
+                  text: "ENTER",
+                  isLoading: _isLoading,
+                  onPressed: _startLoading
                 ),
               ],
             ),
@@ -95,6 +84,18 @@ class _LoginPageState extends State<LoginPage> {
       builder: (context) => const UserListPage(),
     );
     Navigator.push(context, route);
+  }
+
+  void _startLoading() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Future.delayed(const Duration(seconds: 1)).then((value) {
+      setState(() {
+        _isLoading = false;
+      });
+      _goToUsersPage();
+    });
   }
 
 }
