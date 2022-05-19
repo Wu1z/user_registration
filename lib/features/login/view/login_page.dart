@@ -1,5 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_list/view/user_list_page.dart';
+import 'package:user_registration/shared/connection/api_client.dart';
+import 'package:user_registration/shared/models/login_request_model.dart';
+import 'package:user_registration/shared/models/login_response_model.dart';
+import 'package:user_registration/shared/utils/my_preferences.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 
@@ -16,6 +23,14 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _hidePassword = true;
   bool _isLoading = false;
+
+  Future<LoginResponseModel> login() async {
+    final user = LoginRequestModel(
+      username: _usernameController.text,
+      password: _passwordController.text,
+    );
+    return ApiClient().login(user);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,12 +105,41 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
     });
-    await Future.delayed(const Duration(seconds: 1)).then((value) {
-      setState(() {
-        _isLoading = false;
-      });
-      _goToUsersPage();
+    await login().then((value) async {
+      if(value.token != null) {
+        await _saveToken(value);
+        _goToUsersPage();
+      }
+    }).catchError((error, stackTrace) {
+      _showError();
     });
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _saveToken(LoginResponseModel value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("token", value.token!);
+  }
+
+  void _showError() {
+    showDialog(
+      context: context, 
+      builder: (_) {
+        return AlertDialog(
+          content: const Text("Error no login"),
+          actions: [
+            ElevatedButton(
+              child: const Text("CONFIRM"),
+              onPressed: () {
+                Navigator.pop(context);
+              }, 
+            ),
+          ],
+        );
+      }
+    );
   }
 
 }

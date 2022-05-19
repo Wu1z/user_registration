@@ -9,21 +9,21 @@ import 'package:user_registration/shared/models/person_model.dart';
 class ApiClient {
   final timeout = const Duration(seconds: 60);
 
-  Future<LoginResponseModel> login(LoginRequestModel user, String token) async {
+  Future<LoginResponseModel> login(LoginRequestModel user) async {
     final response = await http.post(
-      Uri.parse("${ApiRoute.personRoute}/}"),
+      Uri.parse(ApiRoute.authRoute),
       body: json.encode(user),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      }
-    );
+      },
+    ).timeout(timeout);
 
     if(response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return LoginResponseModel.fromJson(json);
     } else {
-      throw Exception("Erro: ${response.statusCode}");
+      final json = jsonDecode(response.body);
+      throw Exception("Erro: $json");
     }
   }
 
@@ -35,7 +35,7 @@ class ApiClient {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       }
-    );
+    ).timeout(timeout);
 
     if(response.statusCode == 200) {
       return true;
@@ -51,7 +51,7 @@ class ApiClient {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       }
-    );
+    ).timeout(timeout);
 
     if(response.statusCode == 200) {
       final list = <PersonModel>[];
@@ -72,7 +72,7 @@ class ApiClient {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       }
-    );
+    ).timeout(timeout);
 
     if(response.statusCode == 200) {
       final json = jsonDecode(response.body);
@@ -89,7 +89,7 @@ class ApiClient {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       }
-    );
+    ).timeout(timeout);
 
     if(response.statusCode == 200) {
       return true;
@@ -105,7 +105,7 @@ class ApiClient {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       }
-    );
+    ).timeout(timeout);
 
     if(response.statusCode == 200) {
       return true;
