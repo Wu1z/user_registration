@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_registration/features/user_profile/view/user_profile_page.dart';
 
 class UserListPage extends StatefulWidget {
   const UserListPage({Key? key}) : super(key: key);
@@ -14,10 +15,14 @@ class _UserListPageState extends State<UserListPage> {
       appBar: AppBar(
         title: const Text("Users"),
       ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () => _goToProfilePage(),
+      ),
       body: ListView.separated(
         itemCount: 10,
         physics: const BouncingScrollPhysics(),
-        separatorBuilder: (context, index) => const Divider(thickness: 1),
+        separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (_, index) {
           return ListTile(
             contentPadding: const EdgeInsets.all(8),
@@ -30,8 +35,9 @@ class _UserListPageState extends State<UserListPage> {
               "Nome $index",
               style: const TextStyle(fontSize: 16),
             ),
-            trailing: const Icon(
-              Icons.arrow_forward_rounded,
+            trailing: Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Theme.of(context).colorScheme.secondary,
             ),
             onTap: () => _goToProfilePage(),
           );
@@ -41,6 +47,9 @@ class _UserListPageState extends State<UserListPage> {
   }
 
   _goToProfilePage() {
-    debugPrint('');
+    final route = MaterialPageRoute(
+      builder: (context) => const UserProfilePage(),
+    );
+    Navigator.push(context, route);
   }
 }

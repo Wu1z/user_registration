@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:user_registration/user_list/view/user_list_page.dart';
+import 'package:user_registration/features/user_list/view/user_list_page.dart';
+import 'package:user_registration/shared/widgets/default_text_field.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -12,6 +13,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _hidePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -33,35 +35,26 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                TextField(
+                DefaultTextField(
+                  label: "User", 
                   controller: _usernameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        width: 0,
-                        style: BorderStyle.none
-                      ),
-                    ),
-                    label: const Text("User"),
-                    filled: true,
-                    prefixIcon: const Icon(Icons.person),
-                  ),
+                  maxLength: 20,
+                  inputType: TextInputType.emailAddress,
+                  icon: const Icon(Icons.person),
                 ),
                 const SizedBox(height: 20),
-                TextField(
+                DefaultTextField(
+                  label: "Password", 
                   controller: _passwordController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        width: 0,
-                        style: BorderStyle.none
-                      ),
-                    ),
-                    label: const Text("Password"),
-                    filled: true,
-                    prefixIcon: const Icon(Icons.lock),
+                  isPassword: _hidePassword,
+                  maxLength: 10,
+                  icon: const Icon(Icons.key_rounded),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.remove_red_eye_rounded),
+                    color: _hidePassword 
+                      ? Colors.grey
+                      : Theme.of(context).colorScheme.primary,
+                    onPressed: () => _onShowPassword()
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -89,6 +82,12 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );   
+  }
+
+  _onShowPassword() {
+    setState(() {
+      _hidePassword = !_hidePassword;
+    });
   }
 
   _goToUsersPage() {
