@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_profile/viewmodel/user_profile_view_model.dart';
-import 'package:user_registration/shared/connection/api_client.dart';
 import 'package:user_registration/shared/models/person_model.dart';
+import 'package:user_registration/shared/repositories/person_repository.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
+import 'package:user_registration/shared/widgets/confirm_dialog.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
+import 'package:user_registration/shared/widgets/my_choice_chip.dart';
 
 class UserProfilePage extends StatefulWidget {
   final PersonModel? person;
@@ -20,33 +23,49 @@ class UserProfilePage extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  
+
   final _nameController = TextEditingController();
   final _cpfController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _viewModel = UserProfileViewModel();
+  final _repository = PersonRepository(Client());
+  final List<String> _profiles = [];
   bool _hidePassword = true;
-  bool _isUser = false;
-  bool _isManager = false;
-  bool _isAdministrator = false;
   bool _isLoading = false;
+  bool _isNew = true;
 
   @override
   void initState() {
     super.initState();
     if(widget.person != null) {
+      _isNew = false;
       _nameController.text = widget.person!.name ?? "";
       _cpfController.text = widget.person!.cpf ?? "";
       _emailController.text = widget.person!.email ?? "";
       _passwordController.text = widget.person!.password ?? "";
+      if(widget.person!.profiles != null && widget.person!.profiles!.isNotEmpty) {
+        _profiles.addAll(widget.person!.profiles!);
+      }
     }
   }
 
   Future<bool> post(PersonModel person) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
-    return ApiClient().post(person, token);
+    return _repository.post(person, token);
+  }
+
+  Future<bool> put(PersonModel person) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+    return _repository.put(person, token);
+  }
+  
+  Future<bool> delete(PersonModel? person) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+    return _repository.delete(person?.id, token);
   }
   
   @override
@@ -60,47 +79,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 20),
-              child: Wrap(
-                spacing: 10,
-                children: [
-                  FilterChip(
-                    label: const Text('USER'),
-                    selected: _isUser,
-                    elevation: 0,
-                    selectedColor: Theme.of(context).colorScheme.primary,
-                    onSelected: (value) {
-                      setState(() {
-                        _isUser = value;
-                      });
-                    },
-                  ),
-                  FilterChip(
-                    label: const Text('MANAGER'),
-                    selected: _isManager,
-                    elevation: 0,
-                    selectedColor: Theme.of(context).colorScheme.primary,
-                    onSelected: (value) {
-                      setState(() {
-                        _isManager = value;
-                      });
-                    },
-                  ),
-                  FilterChip(
-                    label: const Text('ADMINISTRATOR'),
-                    selected: _isAdministrator,
-                    elevation: 0,
-                    selectedColor: Theme.of(context).colorScheme.primary,
-                    onSelected: (value) {
-                      setState(() {
-                        _isAdministrator = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
+            MyChoiceChip(
+              initialValue: _profiles.first,
+              onChanged: (value) {
+                _addProfile(value);
+              },
             ),
+            const SizedBox(height: 20),
             DefaultTextField(
               label: "Name", 
               controller: _nameController,
@@ -162,12 +147,33 @@ class _UserProfilePageState extends State<UserProfilePage> {
             AsyncButton(
               text: "SAVE",
               isLoading: _isLoading,
-              onPressed: _startLoading
+              onPressed: _onPressedSave
+            ),
+            const SizedBox(height: 20),
+            Visibility(
+              visible: !_isNew,
+              child: AsyncButton(
+                text: "DELETE",
+                isLoading: _isLoading,
+                onPressed: _onPressedDelete
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<bool> sendPerson() async {
+    final person = PersonModel(
+      id: widget.person?.id,
+      name: _nameController.text,
+      cpf: _cpfController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      profiles: _profiles,
+    );
+    return _isNew ? post(person) : put(person);
   }
 
   _onShowPassword() {
@@ -176,25 +182,68 @@ class _UserProfilePageState extends State<UserProfilePage> {
     });
   }
 
-  void _startLoading() async {
-    setState(() {
-      _isLoading = true;
+  void _onPressedSave() async {
+    _changeLoadingState(true);
+    await sendPerson().then((success) {
+      _changeLoadingState(false);
+      if(success) Navigator.pop(context, true);
+    }).catchError((error, stackTrace) {
+      _showError();
     });
-    await Future.delayed(const Duration(seconds: 3)).then((value) {
-      setState(() {
-        _isLoading = false;
-      });
-      Navigator.pop(context);
+    _changeLoadingState(false);
+  }
+
+  void _onPressedDelete() {
+    _changeLoadingState(true);
+    _showConfirmDialog();
+    _changeLoadingState(false);
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context, 
+      builder: (_) {
+        return ConfirmDialog(
+          titulo: "Attention", 
+          descricao: "Do you really want to delete this person?", 
+          onConfirm: () => delete(widget.person).then((value) {
+            if(value) Navigator.pop(context, true);
+          }).catchError((error) {
+            _showError();
+          }),
+        );
+      },
+    );
+  }
+
+  void _changeLoadingState(bool value) {
+    setState(() {
+      _isLoading = value;
     });
   }
 
-  Future<bool> sendPerson() async {
-    final person = PersonModel(
-      name: _nameController.text,
-      cpf: _cpfController.text,
-      email: _emailController.text,
-      password: _passwordController.text,
+  void _addProfile(String value) {
+    debugPrint(value);
+    _profiles.clear();
+    _profiles.add(value);
+  }
+
+  void _showError() {
+    showDialog(
+      context: context, 
+      builder: (_) {
+        return AlertDialog(
+          content: const Text("Save error"),
+          actions: [
+            ElevatedButton(
+              child: const Text("CONFIRM"),
+              onPressed: () {
+                Navigator.pop(context);
+              }, 
+            ),
+          ],
+        );
+      }
     );
-    return post(person);
   }
 }

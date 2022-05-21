@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_list/view/user_list_page.dart';
-import 'package:user_registration/shared/connection/api_client.dart';
 import 'package:user_registration/shared/models/login_request_model.dart';
 import 'package:user_registration/shared/models/login_response_model.dart';
+import 'package:user_registration/shared/repositories/auth_repository.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 
@@ -18,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _repository = AuthRepository(Client());
   bool _hidePassword = true;
   bool _isLoading = false;
 
@@ -26,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
       username: _usernameController.text,
       password: _passwordController.text,
     );
-    return ApiClient().login(user);
+    return _repository.login(user);
   }
 
   @override

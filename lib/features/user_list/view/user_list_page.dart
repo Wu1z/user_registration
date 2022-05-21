@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_profile/view/user_profile_page.dart';
-import 'package:user_registration/shared/connection/api_client.dart';
 import 'package:user_registration/shared/models/person_model.dart';
+import 'package:user_registration/shared/repositories/person_repository.dart';
 
 class UserListPage extends StatefulWidget {
   const UserListPage({Key? key}) : super(key: key);
@@ -14,6 +15,7 @@ class UserListPage extends StatefulWidget {
 class _UserListPageState extends State<UserListPage> {
 
   late Future<List<PersonModel>> _request;
+  final _repository = PersonRepository(Client());
 
   @override
   void initState() {
@@ -24,7 +26,7 @@ class _UserListPageState extends State<UserListPage> {
   Future<List<PersonModel>> getPersons() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
-    return ApiClient().getAll(token);
+    return _repository.getAll(token);
   }
 
   @override
@@ -35,7 +37,7 @@ class _UserListPageState extends State<UserListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () => _goToProfilePage(null),
+        onPressed: () => _goToProfilePage(PersonModel()),
       ),
       body: FutureBuilder<List<PersonModel>>(
         future: _request,
@@ -88,6 +90,26 @@ class _UserListPageState extends State<UserListPage> {
     final route = MaterialPageRoute(
       builder: (context) => UserProfilePage(person: person),
     );
-    Navigator.push(context, route);
+    final success = await Navigator.push(context, route);
+    _showSuccessMessage(success);
+  }
+
+  _showSuccessMessage(bool success) {
+    if(success) {
+      final snackBar = SnackBar(
+        content: const Text(
+          'Person successfuly registered!',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.black87.withOpacity(0.8),
+        margin: const EdgeInsets.all(20),
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 }
