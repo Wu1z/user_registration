@@ -27,7 +27,7 @@ class ApiClient {
     }
   }
 
-  Future<bool> post(PersonModel person, String token) async {
+  Future<bool> post(PersonModel person, String? token) async {
     final response = await http.post(
       Uri.parse("${ApiRoute.personRoute}/}"),
       body: json.encode(person),
@@ -44,7 +44,7 @@ class ApiClient {
     }
   }
 
-  Future<List<PersonModel>> getAll(String token) async {
+  Future<List<PersonModel>> getAll(String? token) async {
     final response = await http.get(
       Uri.parse(ApiRoute.personRoute),
       headers: {

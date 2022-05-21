@@ -29,7 +29,7 @@ class AsyncButton extends StatelessWidget {
         child: isLoading ?? false
         ? CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).colorScheme.secondary, //<-- SEE HERE
+            Theme.of(context).colorScheme.secondary,
           ),
         )
         : Text(

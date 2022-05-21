@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_profile/viewmodel/user_profile_view_model.dart';
+import 'package:user_registration/shared/connection/api_client.dart';
+import 'package:user_registration/shared/models/person_model.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 
 class UserProfilePage extends StatefulWidget {
-  const UserProfilePage({Key? key}) : super(key: key);
+  final PersonModel? person;
+
+  const UserProfilePage({
+    Key? key, 
+    this.person,
+  }) : super(key: key);
 
   @override
   State<UserProfilePage> createState() => _UserProfilePageState();
@@ -23,6 +31,23 @@ class _UserProfilePageState extends State<UserProfilePage> {
   bool _isManager = false;
   bool _isAdministrator = false;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if(widget.person != null) {
+      _nameController.text = widget.person!.name ?? "";
+      _cpfController.text = widget.person!.cpf ?? "";
+      _emailController.text = widget.person!.email ?? "";
+      _passwordController.text = widget.person!.password ?? "";
+    }
+  }
+
+  Future<bool> post(PersonModel person) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+    return ApiClient().post(person, token);
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -161,5 +186,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
       });
       Navigator.pop(context);
     });
+  }
+
+  Future<bool> sendPerson() async {
+    final person = PersonModel(
+      name: _nameController.text,
+      cpf: _cpfController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+    return post(person);
   }
 }
