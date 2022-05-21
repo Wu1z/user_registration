@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:user_registration/features/user_profile/view/user_profile_page.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 
 class UserListPage extends StatefulWidget {

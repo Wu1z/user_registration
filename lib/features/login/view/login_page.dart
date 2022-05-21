@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_list/view/user_list_page.dart';
 import 'package:user_registration/shared/connection/api_client.dart';
 import 'package:user_registration/shared/models/login_request_model.dart';
 import 'package:user_registration/shared/models/login_response_model.dart';
-import 'package:user_registration/shared/utils/my_preferences.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 

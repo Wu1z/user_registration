@@ -1,9 +1,6 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:user_registration/features/user_profile/viewmodel/user_profile_view_model.dart';
-import 'package:user_registration/shared/models/profiles_enum.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
 
@@ -31,7 +28,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Profile"),
+        title: const Text("Profile"),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -39,12 +36,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.only(top: 10, bottom: 20),
+              padding: const EdgeInsets.only(top: 10, bottom: 20),
               child: Wrap(
                 spacing: 10,
                 children: [
                   FilterChip(
-                    label: Text('USER'),
+                    label: const Text('USER'),
                     selected: _isUser,
                     elevation: 0,
                     selectedColor: Theme.of(context).colorScheme.primary,
@@ -55,7 +52,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     },
                   ),
                   FilterChip(
-                    label: Text('MANAGER'),
+                    label: const Text('MANAGER'),
                     selected: _isManager,
                     elevation: 0,
                     selectedColor: Theme.of(context).colorScheme.primary,
@@ -66,7 +63,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     },
                   ),
                   FilterChip(
-                    label: Text('ADMINISTRATOR'),
+                    label: const Text('ADMINISTRATOR'),
                     selected: _isAdministrator,
                     elevation: 0,
                     selectedColor: Theme.of(context).colorScheme.primary,
@@ -158,7 +155,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() {
       _isLoading = true;
     });
-    await Future.delayed(Duration(seconds: 3)).then((value) {
+    await Future.delayed(const Duration(seconds: 3)).then((value) {
       setState(() {
         _isLoading = false;
       });
