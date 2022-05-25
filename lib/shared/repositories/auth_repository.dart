@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart';
+import 'package:user_registration/shared/connection/api_exception.dart';
 import 'package:user_registration/shared/connection/api_route.dart';
 import 'package:user_registration/shared/models/login_response_model.dart';
 import 'package:user_registration/shared/models/login_request_model.dart';
@@ -27,8 +28,7 @@ class AuthRepository implements IAuthRepository {
       final json = jsonDecode(response.body);
       return LoginResponseModel.fromJson(json);
     } else {
-      final json = jsonDecode(response.body);
-      throw Exception("Erro: $json");
+      throw ApiException(response).exception;
     }
   }
 }

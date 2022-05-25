@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:user_registration/shared/connection/api_exception.dart';
 import 'package:user_registration/shared/connection/api_route.dart';
 import 'package:user_registration/shared/models/login_request_model.dart';
 import 'package:user_registration/shared/models/login_response_model.dart';
@@ -22,8 +23,7 @@ class ApiClient {
       final json = jsonDecode(response.body);
       return LoginResponseModel.fromJson(json);
     } else {
-      final json = jsonDecode(response.body);
-      throw Exception("Erro: $json");
+      throw ApiException(response);
     }
   }
 
@@ -40,7 +40,7 @@ class ApiClient {
     if(response.statusCode == 200) {
       return true;
     } else {
-      throw Exception("Erro: ${response.statusCode}");
+      throw ApiException(response);
     }
   }
 
@@ -61,7 +61,7 @@ class ApiClient {
       });
       return list;
     } else {
-      throw Exception("Erro: ${response.statusCode}");
+      throw ApiException(response);
     }
   }
 
@@ -78,7 +78,7 @@ class ApiClient {
       final json = jsonDecode(response.body);
       return PersonModel.fromJson(json);
     } else {
-      throw Exception("Erro: ${response.statusCode}");
+      throw ApiException(response);
     }
   }
 
@@ -94,7 +94,7 @@ class ApiClient {
     if(response.statusCode == 200) {
       return true;
     } else {
-      throw Exception("Erro: ${response.statusCode}");
+      throw ApiException(response);
     }
   }
     
@@ -110,7 +110,7 @@ class ApiClient {
     if(response.statusCode == 200) {
       return true;
     } else {
-      throw Exception("Erro: ${response.statusCode}");
+      throw ApiException(response);
     }
   }
 }

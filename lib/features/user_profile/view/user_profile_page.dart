@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_profile/viewmodel/user_profile_view_model.dart';
+import 'package:user_registration/shared/connection/api_exception.dart';
 import 'package:user_registration/shared/models/person_model.dart';
 import 'package:user_registration/shared/repositories/person_repository.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
@@ -30,7 +31,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   final _passwordController = TextEditingController();
   final _viewModel = UserProfileViewModel();
   final _repository = PersonRepository(Client());
-  final List<String> _profiles = [];
+  final List<String> _profiles = ["USER", "MANAGER", "ADMINISTRATOR"];
   bool _hidePassword = true;
   bool _isLoading = false;
   bool _isNew = true;
@@ -188,7 +189,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       _changeLoadingState(false);
       if(success) Navigator.pop(context, true);
     }).catchError((error, stackTrace) {
-      _showError();
+      _showError(error);
     });
     _changeLoadingState(false);
   }
@@ -209,7 +210,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           onConfirm: () => delete(widget.person).then((value) {
             if(value) Navigator.pop(context, true);
           }).catchError((error) {
-            _showError();
+            _showError(error);
           }),
         );
       },
@@ -228,18 +229,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _profiles.add(value);
   }
 
-  void _showError() {
+  void _showError(AppException error) {
     showDialog(
       context: context, 
       builder: (_) {
         return AlertDialog(
-          content: const Text("Save error"),
+          content: Text(error.toString()),
           actions: [
-            ElevatedButton(
-              child: const Text("CONFIRM"),
-              onPressed: () {
-                Navigator.pop(context);
-              }, 
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: ElevatedButton(
+                child: const Text("CONFIRM"),
+                onPressed: () {
+                  Navigator.pop(context);
+                }, 
+              ),
             ),
           ],
         );
