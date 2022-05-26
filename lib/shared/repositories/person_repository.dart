@@ -80,7 +80,7 @@ class PersonRepository implements IPersonRepository {
       }
     ).timeout(timeout);
 
-    if(response.statusCode == 200) {
+    if(response.statusCode == 201) {
       return true;
     } else {
       throw ApiException(response).exception;

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_profile/viewmodel/user_profile_view_model.dart';
 import 'package:user_registration/shared/connection/api_exception.dart';
 import 'package:user_registration/shared/models/person_model.dart';
+import 'package:user_registration/shared/models/register_action_enum.dart';
 import 'package:user_registration/shared/repositories/person_repository.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/confirm_dialog.dart';
@@ -31,7 +32,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   final _passwordController = TextEditingController();
   final _viewModel = UserProfileViewModel();
   final _repository = PersonRepository(Client());
-  final List<String> _profiles = ["USER", "MANAGER", "ADMINISTRATOR"];
+  final _mask = MaskTextInputFormatter(mask: "###.###.###-##", filter: {"#": RegExp(r'[0-9]')});
+  final List<String> _profiles = ["USER"];
   bool _hidePassword = true;
   bool _isLoading = false;
   bool _isNew = true;
@@ -46,7 +48,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       _emailController.text = widget.person!.email ?? "";
       _passwordController.text = widget.person!.password ?? "";
       if(widget.person!.profiles != null && widget.person!.profiles!.isNotEmpty) {
-        _profiles.addAll(widget.person!.profiles!);
+        _addProfile(widget.person!.profiles!.first);
       }
     }
   }
@@ -103,14 +105,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   errorText: error,
                   onChanged: (text) => _viewModel.validateCpf(text),
                   icon: const Icon(Icons.person_pin_rounded),
-                  inputFormatters: [
-                    MaskTextInputFormatter(
-                      mask: "###.###.###-##", 
-                      filter: { 
-                        "#": RegExp(r'[0-9]') 
-                      },
-                    )
-                  ],
+                  inputType: TextInputType.number,
+                  inputFormatters: [_mask],
                 );
               },
             ),
@@ -187,11 +183,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _changeLoadingState(true);
     await sendPerson().then((success) {
       _changeLoadingState(false);
-      if(success) Navigator.pop(context, true);
+      _backToList(success);
     }).catchError((error, stackTrace) {
       _showError(error);
     });
     _changeLoadingState(false);
+  }
+
+  void _backToList(bool success) {
+    if(success) {
+      final action = _isNew ? RegisterAction.insert : RegisterAction.update;
+      Navigator.pop(context, action);
+    }
   }
 
   void _onPressedDelete() {
@@ -208,7 +211,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
           titulo: "Attention", 
           descricao: "Do you really want to delete this person?", 
           onConfirm: () => delete(widget.person).then((value) {
-            if(value) Navigator.pop(context, true);
+            if(value) {
+              Navigator.pop(context);
+              Navigator.pop(context, RegisterAction.delete);
+            }
           }).catchError((error) {
             _showError(error);
           }),

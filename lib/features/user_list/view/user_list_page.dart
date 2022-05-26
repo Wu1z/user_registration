@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_registration/features/user_profile/view/user_profile_page.dart';
 import 'package:user_registration/shared/models/person_model.dart';
+import 'package:user_registration/shared/models/register_action_enum.dart';
 import 'package:user_registration/shared/repositories/person_repository.dart';
 
 class UserListPage extends StatefulWidget {
@@ -37,7 +38,7 @@ class _UserListPageState extends State<UserListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () => _goToProfilePage(PersonModel()),
+        onPressed: () => _goToProfilePage(null),
       ),
       body: FutureBuilder<List<PersonModel>>(
         future: _request,
@@ -91,25 +92,36 @@ class _UserListPageState extends State<UserListPage> {
       builder: (context) => UserProfilePage(person: person),
     );
     final success = await Navigator.push(context, route);
-    _showSuccessMessage(success);
+    _onReturn(success);
   }
 
-  _showSuccessMessage(bool success) {
-    if(success) {
-      final snackBar = SnackBar(
-        content: const Text(
-          'Person successfuly registered!',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.black87.withOpacity(0.8),
-        margin: const EdgeInsets.all(20),
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  _onReturn(RegisterAction? action) {
+    if(action != null) {
+      _refresh();
+      _showSnackBar('Person succesfuly ${action.value}!');
     }
+  }
+
+  _showSnackBar(String message) {
+    final snackBar = SnackBar(
+      content: Text(
+        message,
+        style: const TextStyle(color: Colors.white),
+      ),
+      backgroundColor: Colors.black87.withOpacity(0.8),
+      margin: const EdgeInsets.all(20),
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30.0),
+      ),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  _refresh() {
+    setState(() {
+      _request = getPersons();
+    });
   }
 }
