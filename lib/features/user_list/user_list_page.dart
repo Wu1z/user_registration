@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:user_registration/features/user_profile/view/user_profile_page.dart';
+import 'package:user_registration/features/user_list/user_list_view_model.dart';
+import 'package:user_registration/features/user_profile/user_profile_page.dart';
 import 'package:user_registration/shared/models/person_model.dart';
 import 'package:user_registration/shared/models/register_action_enum.dart';
 import 'package:user_registration/shared/repositories/person_repository.dart';
@@ -16,18 +18,14 @@ class UserListPage extends StatefulWidget {
 class _UserListPageState extends State<UserListPage> {
 
   late Future<List<PersonModel>> _request;
+  late UserListViewModel _viewModel;
   final _repository = PersonRepository(Client());
 
   @override
   void initState() {
+    _viewModel = UserListViewModel(_repository);
+    _request = _viewModel.getPersons();
     super.initState();
-    _request = getPersons();
-  }
-
-  Future<List<PersonModel>> getPersons() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
-    return _repository.getAll(token);
   }
 
   @override
@@ -87,7 +85,7 @@ class _UserListPageState extends State<UserListPage> {
     );   
   }
 
-  _goToProfilePage(PersonModel? person) async {
+  void _goToProfilePage(PersonModel? person) async {
     final route = MaterialPageRoute(
       builder: (context) => UserProfilePage(person: person),
     );
@@ -95,14 +93,14 @@ class _UserListPageState extends State<UserListPage> {
     _onReturn(success);
   }
 
-  _onReturn(RegisterAction? action) {
+  void _onReturn(RegisterAction? action) {
     if(action != null) {
       _refresh();
       _showSnackBar('Person succesfuly ${action.value}!');
     }
   }
 
-  _showSnackBar(String message) {
+  void _showSnackBar(String message) {
     final snackBar = SnackBar(
       content: Text(
         message,
@@ -119,9 +117,9 @@ class _UserListPageState extends State<UserListPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  _refresh() {
+  void _refresh() {
     setState(() {
-      _request = getPersons();
+      _request = _viewModel.getPersons();
     });
   }
 }

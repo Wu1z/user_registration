@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:user_registration/features/login/view/login_page.dart';
+import 'package:user_registration/features/login/login_page.dart';
 import 'package:user_registration/shared/theme/theme.dart';
 import 'package:user_registration/shared/utils/my_preferences.dart';
 

@@ -18,14 +18,24 @@ class ApiException {
         final exception = ExceptionModel.fromJson(jsonDecode(response.body));
         return UnauthorisedException(exception.message);
 
+      case 403:
+        final exception = ExceptionModel.fromJson(jsonDecode(response.body));
+        return InvalidTokenException(exception.message);
+
       case 404:
-        return NotFoundException("${response.statusCode}");
+        final exception = ExceptionModel.fromJson(jsonDecode(response.body));
+        return NotFoundException(exception.message);
+
+      case 422:
+        final exception = ExceptionModel.fromJson(jsonDecode(response.body));
+        return DuplicateException(exception.message);
 
       case 500:
-        return ServerException("${response.statusCode}");
+        final exception = ExceptionModel.fromJson(jsonDecode(response.body));
+        return ServerException(exception.message);
 
       default:
-        return AppException("Api Exception ${response.statusCode}: ${response.body}");
+        return AppException(response.body, "Api Exception ${response.statusCode}: ",);
     }
   }
 }
@@ -38,7 +48,10 @@ class AppException implements Exception {
 
   @override
   String toString() {
-    return "$prefix$message";
+    String result = '';
+    if(prefix != null) result = "$prefix";
+    if(message != null) result = "$result$message";
+    return result;
   }
 }
 
@@ -50,8 +63,16 @@ class UnauthorisedException extends AppException {
   UnauthorisedException([message]) : super(message, "Unauthorised: ");
 }
 
+class InvalidTokenException extends AppException {
+  InvalidTokenException([message]) : super(message, "Invalid Token: ");
+}
+
 class NotFoundException extends AppException {
   NotFoundException([message]) : super(message, "Not Found: ");
+}
+
+class DuplicateException extends AppException {
+  DuplicateException([message]) : super(message, "Duplicate Person: ");
 }
 
 class ServerException extends AppException {

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:user_registration/features/user_list/view/user_list_page.dart';
-import 'package:user_registration/shared/models/login_request_model.dart';
-import 'package:user_registration/shared/models/login_response_model.dart';
+import 'package:user_registration/features/login/login_view_model.dart';
+import 'package:user_registration/features/user_list/user_list_page.dart';
+import 'package:user_registration/shared/connection/api_exception.dart';
 import 'package:user_registration/shared/repositories/auth_repository.dart';
 import 'package:user_registration/shared/widgets/async_button.dart';
 import 'package:user_registration/shared/widgets/default_text_field.dart';
+import 'package:user_registration/shared/widgets/error_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -20,15 +20,14 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _repository = AuthRepository(Client());
+  late LoginViewModel _viewModel;
   bool _hidePassword = true;
   bool _isLoading = false;
 
-  Future<LoginResponseModel> login() async {
-    final user = LoginRequestModel(
-      username: _usernameController.text,
-      password: _passwordController.text,
-    );
-    return _repository.login(user);
+  @override
+  void initState() {
+    _viewModel = LoginViewModel(_repository);
+    super.initState();
   }
 
   @override
@@ -77,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
                 AsyncButton(
                   text: "ENTER",
                   isLoading: _isLoading,
-                  onPressed: _startLoading
+                  onPressed: _onEnterLogin
                 ),
               ],
             ),
@@ -87,56 +86,48 @@ class _LoginPageState extends State<LoginPage> {
     );   
   }
 
-  _onShowPassword() {
+  void _onEnterLogin() async {
+    _changeLoadingState(true);
+    await _onLoginResult();
+    _changeLoadingState(false);
+  }
+
+  Future<void> _onLoginResult() async {
+    await _viewModel.login(
+      username: _usernameController.text,
+      password: _passwordController.text
+    ).then((value) async {
+      await _viewModel.saveToken(value);
+      _goToUsersPage();
+    }).catchError((error, stackTrace) {
+      _showError(error);
+    });
+  }
+
+  void _onShowPassword() {
     setState(() {
       _hidePassword = !_hidePassword;
     });
   }
 
-  _goToUsersPage() {
+  void _changeLoadingState(bool value) {
+    setState(() {
+      _isLoading = value;
+    });
+  }
+
+  void _goToUsersPage() {
     final route = MaterialPageRoute(
       builder: (context) => const UserListPage(),
     );
     Navigator.push(context, route);
   }
 
-  void _startLoading() async {
-    setState(() {
-      _isLoading = true;
-    });
-    await login().then((value) async {
-      if(value.token != null) {
-        await _saveToken(value);
-        _goToUsersPage();
-      }
-    }).catchError((error, stackTrace) {
-      _showError();
-    });
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _saveToken(LoginResponseModel value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("token", value.token!);
-  }
-
-  void _showError() {
+  void _showError(AppException error) {
     showDialog(
       context: context, 
       builder: (_) {
-        return AlertDialog(
-          content: const Text("Error no login"),
-          actions: [
-            ElevatedButton(
-              child: const Text("CONFIRM"),
-              onPressed: () {
-                Navigator.pop(context);
-              }, 
-            ),
-          ],
-        );
+        return ErrorDialog(message: error.toString());
       }
     );
   }

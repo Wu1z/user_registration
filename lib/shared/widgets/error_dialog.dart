@@ -1,17 +1,12 @@
+
 import 'package:flutter/material.dart';
 import 'package:user_registration/shared/widgets/default_button.dart';
 
-class ConfirmDialog extends StatelessWidget {
-  final String titulo;
-  final String descricao;
-  final VoidCallback onConfirm;
+class ErrorDialog extends StatelessWidget {
 
-  const ConfirmDialog({
-    Key? key,
-    required this.titulo, 
-    required this.descricao,
-    required this.onConfirm,
-  }) : super(key: key);
+  final String message;
+
+  const ErrorDialog({Key? key, required this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +25,7 @@ class ConfirmDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  titulo,
+                  "Error",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 22,
@@ -40,44 +35,32 @@ class ConfirmDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  descricao,
+                  message,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.outline,
+                    fontSize: 20
                   ),
                 ),
                 const SizedBox(height: 10),
                 const Divider(),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
                       child: SizedBox(
                         height: 40,
                         child: DefaultButton(
-                          text: "NO",
+                          text: "CONFIRM",
                           color: Colors.white,
                           textColor: Colors.black,
                           onPressed: () {
-                            Navigator.of(context).pop(false);
+                            Navigator.pop(context);
                           },
                         ),
                       ),
                     ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: SizedBox(
-                        height: 40,
-                        child: DefaultButton(
-                          text: "YES",
-                          color: Colors.grey[800],
-                          textColor: Colors.white,
-                          onPressed: onConfirm,
-                        ),
-                      ),
-                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),
