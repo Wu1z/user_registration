@@ -48,7 +48,7 @@ class ErrorDialog extends StatelessWidget {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 40,
+                        height: 50,
                         child: DefaultButton(
                           text: "CONFIRM",
                           color: Colors.white,

@@ -53,7 +53,7 @@ class ConfirmDialog extends StatelessWidget {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 40,
+                        height: 50,
                         child: DefaultButton(
                           text: "NO",
                           color: Colors.white,
@@ -67,7 +67,7 @@ class ConfirmDialog extends StatelessWidget {
                     const SizedBox(width: 5),
                     Expanded(
                       child: SizedBox(
-                        height: 40,
+                        height: 50,
                         child: DefaultButton(
                           text: "YES",
                           color: Colors.grey[800],
