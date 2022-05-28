@@ -55,6 +55,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<bool> sendPerson() async {
+    String? token = await _viewModel.getToken();
     final person = PersonModel(
       id: widget.person?.id,
       name: _nameController.text,
@@ -63,7 +64,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       password: _passwordController.text,
       profiles: _profiles,
     );
-    return _isNew ? _viewModel.post(person) : _viewModel.put(person);
+    return _isNew 
+    ? _viewModel.post(person, token) 
+    : _viewModel.put(person, token);
   }
   
   @override
@@ -211,7 +214,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<void> _onConfirmDelete() async {
-    _viewModel.delete(widget.person).then((value) {
+    String? token = await _viewModel.getToken();
+    await _viewModel.delete(widget.person, token).then((value) {
       if(value) {
         Navigator.pop(context);
         Navigator.pop(context, RegisterAction.delete);

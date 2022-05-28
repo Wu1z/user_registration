@@ -10,22 +10,22 @@ class UserProfileViewModel {
 
   UserProfileViewModel(this.repository);
 
-  Future<bool> post(PersonModel person) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+  Future<bool> post(PersonModel person, String? token) async {
     return repository.post(person, token);
   }
 
-  Future<bool> put(PersonModel person) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+  Future<bool> put(PersonModel person, String? token) async {
     return repository.put(person, token);
   }
   
-  Future<bool> delete(PersonModel? person) async {
+  Future<bool> delete(PersonModel? person, String? token) async {
+    return repository.delete(person?.id, token);
+  }
+
+  Future<String?> getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
-    return repository.delete(person?.id, token);
+    return token;
   }
   
   ValueNotifier<String?> emailErrorText = ValueNotifier(null);
